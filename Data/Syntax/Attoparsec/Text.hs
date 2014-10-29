@@ -11,9 +11,7 @@ Stability   :  experimental
 Provides a Syntax instance for Attoparsec.Text.Parser.
 -}
 module Data.Syntax.Attoparsec.Text (
-    -- * Parser.
-    Parser,
-    getParser
+    Parser(..)
     ) where
 
 import           Control.Applicative

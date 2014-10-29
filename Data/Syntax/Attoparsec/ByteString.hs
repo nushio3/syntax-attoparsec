@@ -11,9 +11,7 @@ Stability   :  experimental
 Provides a Syntax instance for Attoparsec.ByteString.Parser.
 -}
 module Data.Syntax.Attoparsec.ByteString (
-    -- * Parser.
-    Parser,
-    getParser
+    Parser(..)
     ) where
 
 import           Control.Applicative
