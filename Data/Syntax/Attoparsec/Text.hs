@@ -20,6 +20,7 @@ import           Control.Monad
 import qualified Data.Attoparsec.Text as AP
 import           Data.SemiIsoFunctor
 import           Data.Syntax
+import           Data.Syntax.Char
 import           Data.Text (Text)
 
 -- | A wrapped 'Data.Attoparsec.Text.Parser'.
@@ -49,3 +50,7 @@ instance Syntax Parser Text where
     takeWhile = Parser . AP.takeWhile
     takeWhile1 = Parser . AP.takeWhile1
     takeTill = Parser . AP.takeTill
+
+instance SyntaxChar Parser Text where
+    decimal = Parser AP.decimal
+    scientific = Parser AP.scientific
