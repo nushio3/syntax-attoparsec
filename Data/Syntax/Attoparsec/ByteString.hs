@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {- |
 Module      :  Data.Syntax.Attoparsec.ByteString
@@ -38,6 +39,9 @@ instance SemiIsoApply Parser where
 instance SemiIsoAlternative Parser where
     siempty = Parser empty
     (Parser x) /|/ (Parser y) = Parser $ x <|> y
+
+instance SemiIsoMonad Parser where
+    (Parser m) //= f = Parser $ m >>= (\x -> (x,) <$> getParser (f x))
 
 instance Syntax Parser ByteString where
     anyChar = Parser AP.anyWord8
