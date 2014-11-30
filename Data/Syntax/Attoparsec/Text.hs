@@ -1,5 +1,6 @@
-{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {- |
 Module      :  Data.Syntax.Attoparsec.Text
 Description :  Syntax instance for Attoparsec.Text.Parser.
@@ -12,39 +13,25 @@ Stability   :  experimental
 Provides a Syntax instance for Attoparsec.Text.Parser.
 -}
 module Data.Syntax.Attoparsec.Text (
-    Parser(..)
+    WrappedParser,
+    getParser
     ) where
 
-import           Control.Applicative
-import           Control.Lens.SemiIso
 import           Control.Monad
 import qualified Data.Attoparsec.Text as AP
 import           Data.SemiIsoFunctor
+import           Data.SemiIsoFunctor.Wrapped
 import           Data.Syntax
 import           Data.Syntax.Char
 import           Data.Text (Text)
 
 -- | A wrapped 'Data.Attoparsec.Text.Parser'.
-newtype Parser a = Parser {
-    -- | Extracts the parser.
-    getParser :: AP.Parser a
-}
+newtype WrappedParser a = Wrapped (WrappedCovariant AP.Parser a)
+    deriving (SemiIsoFunctor, SemiIsoApply, SemiIsoAlternative, SemiIsoMonad)
 
-instance SemiIsoFunctor Parser where
-    simapCo ai (Parser p) = Parser $ p >>= either fail return . apply ai
+pattern Parser a = Wrapped (WrappedCovariant a)
 
-instance SemiIsoApply Parser where
-    sipure ai = Parser $ either fail pure (unapply ai ())
-    (Parser x) /*/ (Parser y) = Parser $ (,) <$> x <*> y
-
-instance SemiIsoAlternative Parser where
-    siempty = Parser empty
-    (Parser x) /|/ (Parser y) = Parser $ x <|> y
-
-instance SemiIsoMonad Parser where
-    (Parser m) //= f = Parser $ m >>= (\x -> (x,) <$> getParser (f x))
-
-instance Syntax Parser Text where
+instance Syntax WrappedParser Text where
     anyChar = Parser AP.anyChar
     char = Parser . void . AP.char
     notChar = Parser . AP.notChar
@@ -55,6 +42,10 @@ instance Syntax Parser Text where
     takeWhile1 = Parser . AP.takeWhile1
     takeTill = Parser . AP.takeTill
 
-instance SyntaxChar Parser Text where
+instance SyntaxChar WrappedParser Text where
     decimal = Parser AP.decimal
     scientific = Parser AP.scientific
+
+-- | Extracts the parser.
+getParser :: WrappedParser a -> AP.Parser a
+getParser (Parser m) = m

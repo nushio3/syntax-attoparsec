@@ -1,5 +1,6 @@
-{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {- |
 Module      :  Data.Syntax.Attoparsec.ByteString
 Description :  Syntax instance for Attoparsec.ByteString.Parser.
@@ -12,38 +13,24 @@ Stability   :  experimental
 Provides a Syntax instance for Attoparsec.ByteString.Parser.
 -}
 module Data.Syntax.Attoparsec.ByteString (
-    Parser(..)
+    WrappedParser,
+    getParser
     ) where
 
-import           Control.Applicative
-import           Control.Lens.SemiIso
 import           Control.Monad
 import qualified Data.Attoparsec.ByteString as AP
-import           Data.SemiIsoFunctor
-import           Data.Syntax
 import           Data.ByteString (ByteString)
+import           Data.SemiIsoFunctor
+import           Data.SemiIsoFunctor.Wrapped
+import           Data.Syntax
 
--- | A wrapped 'Data.Attoparsec.Text.Parser'.
-newtype Parser a = Parser {
-    -- | Extracts the parser.
-    getParser :: AP.Parser a
-}
+-- | A wrapped 'Data.Attoparsec.ByteString.Parser'.
+newtype WrappedParser a = Wrapped (WrappedCovariant AP.Parser a)
+    deriving (SemiIsoFunctor, SemiIsoApply, SemiIsoAlternative, SemiIsoMonad)
 
-instance SemiIsoFunctor Parser where
-    simapCo ai (Parser p) = Parser $ p >>= either fail return . apply ai
+pattern Parser a = Wrapped (WrappedCovariant a)
 
-instance SemiIsoApply Parser where
-    sipure ai = Parser $ either fail pure (unapply ai ())
-    (Parser x) /*/ (Parser y) = Parser $ (,) <$> x <*> y
-
-instance SemiIsoAlternative Parser where
-    siempty = Parser empty
-    (Parser x) /|/ (Parser y) = Parser $ x <|> y
-
-instance SemiIsoMonad Parser where
-    (Parser m) //= f = Parser $ m >>= (\x -> (x,) <$> getParser (f x))
-
-instance Syntax Parser ByteString where
+instance Syntax WrappedParser ByteString where
     anyChar = Parser AP.anyWord8
     char = Parser . void . AP.word8
     notChar = Parser . AP.notWord8
@@ -53,3 +40,7 @@ instance Syntax Parser ByteString where
     takeWhile = Parser . AP.takeWhile
     takeWhile1 = Parser . AP.takeWhile1
     takeTill = Parser . AP.takeTill
+
+-- | Extracts the parser.
+getParser :: WrappedParser a -> AP.Parser a
+getParser (Parser a) = a
