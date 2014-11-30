@@ -10,9 +10,9 @@ License     :  MIT
 Maintainer  :  Paweł Nowak <pawel834@gmail.com>
 Stability   :  experimental
 
-Provides a Syntax instance for Attoparsec.Text.Parser.
+Provides a Syntax instance for Attoparsec.Text.Lazy.Parser.
 -}
-module Data.Syntax.Attoparsec.Text (
+module Data.Syntax.Attoparsec.Text.Lazy (
     WrappedParser,
     getParser
     ) where
