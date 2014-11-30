@@ -2,8 +2,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {- |
-Module      :  Data.Syntax.Attoparsec.Text
-Description :  Syntax instance for Attoparsec.Text.Parser.
+Module      :  Data.Syntax.Attoparsec.Text.Laxy
+Description :  Syntax instance for Attoparsec.Text.Lazy.Parser.
 Copyright   :  (c) Paweł Nowak
 License     :  MIT
 
@@ -18,7 +18,7 @@ module Data.Syntax.Attoparsec.Text (
     ) where
 
 import           Control.Monad
-import qualified Data.Attoparsec.Text as AP
+import qualified Data.Attoparsec.Text.Lazy as AP
 import           Data.Scientific
 import           Data.SemiIsoFunctor
 import           Data.SemiIsoFunctor.Wrapped
