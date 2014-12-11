@@ -19,6 +19,7 @@ module Data.Syntax.Attoparsec.ByteString.Lazy (
 
 import           Control.Arrow (Kleisli(..))
 import           Control.Category
+import           Control.Category.Structures
 import           Control.Monad
 import           Control.SIArrow
 import qualified Data.Attoparsec.ByteString.Lazy as AP
@@ -28,7 +29,7 @@ import           Prelude hiding (id, (.))
 
 -- | A wrapped 'Data.Attoparsec.ByteString.Parser'.
 newtype WrappedParser a b = Wrapped (Kleisli AP.Parser a b)
-    deriving (Category, Products, Coproducts, CategoryPlus, SIArrow)
+    deriving (Category, Products, Coproducts, CatPlus, SIArrow)
 
 wrap :: AP.Parser b -> WrappedParser a b
 wrap = Wrapped . Kleisli . const
