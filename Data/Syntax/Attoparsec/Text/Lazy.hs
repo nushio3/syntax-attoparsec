@@ -1,5 +1,4 @@
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {- |
 Module      :  Data.Syntax.Attoparsec.Text.Laxy
@@ -14,41 +13,50 @@ Provides a Syntax instance for Attoparsec.Text.Lazy.Parser.
 -}
 module Data.Syntax.Attoparsec.Text.Lazy (
     WrappedParser,
-    getParser
+    getParser,
+    getParser_
     ) where
 
+import           Control.Arrow (Kleisli(..))
+import           Control.Category
 import           Control.Monad
+import           Control.SIArrow
 import qualified Data.Attoparsec.Text.Lazy as AP
 import           Data.Scientific
-import           Data.SemiIsoFunctor
-import           Data.SemiIsoFunctor.Wrapped
 import           Data.Syntax
 import           Data.Syntax.Char
 import           Data.Text (Text)
+import Prelude hiding (id, (.))
 
 -- | A wrapped 'Data.Attoparsec.Text.Parser'.
-newtype WrappedParser a = Wrapped (WrappedCovariant AP.Parser a)
-    deriving (SemiIsoFunctor, SemiIsoApply, SemiIsoAlternative, SemiIsoMonad)
+newtype WrappedParser a b = Wrapped (Kleisli AP.Parser a b)
+    deriving (Category, Products, Coproducts, CategoryPlus, SIArrow)
 
-pattern Parser a = Wrapped (WrappedCovariant a)
+wrap :: AP.Parser b -> WrappedParser a b
+wrap = Wrapped . Kleisli . const
 
-instance Syntax WrappedParser Text where
-    anyChar = Parser AP.anyChar
-    char = Parser . void . AP.char
-    notChar = Parser . AP.notChar
-    satisfy = Parser . AP.satisfy
-    string = Parser . void . AP.string
-    take = Parser . AP.take
-    takeWhile = Parser . AP.takeWhile
-    takeWhile1 = Parser . AP.takeWhile1
-    takeTill = Parser . AP.takeTill
+instance Syntax WrappedParser where
+    type Seq WrappedParser = Text
+    anyChar = wrap AP.anyChar
+    char = wrap . void . AP.char
+    notChar = wrap . AP.notChar
+    satisfy = wrap . AP.satisfy
+    string = wrap . void . AP.string
+    take = wrap . AP.take
+    takeWhile = wrap . AP.takeWhile
+    takeWhile1 = wrap . AP.takeWhile1
+    takeTill = wrap . AP.takeTill
 
-instance SyntaxChar WrappedParser Text where
-    decimal = Parser AP.decimal
-    hexadecimal = Parser AP.hexadecimal
-    realFloat = Parser $ fmap toRealFloat AP.scientific
-    scientific = Parser AP.scientific
+instance SyntaxChar WrappedParser where
+    decimal = wrap AP.decimal
+    hexadecimal = wrap AP.hexadecimal
+    realFloat = wrap $ fmap toRealFloat AP.scientific
+    scientific = wrap AP.scientific
 
 -- | Extracts the parser.
-getParser :: WrappedParser a -> AP.Parser a
-getParser (Parser m) = m
+getParser :: WrappedParser a b -> a -> AP.Parser b
+getParser (Wrapped (Kleisli f)) = f
+
+-- | Extracts the parser.
+getParser_ :: WrappedParser () b -> AP.Parser b
+getParser_ (Wrapped (Kleisli f)) = f ()

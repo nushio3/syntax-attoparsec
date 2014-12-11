@@ -1,17 +1,17 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {- |
-Module      :  Data.Syntax.Attoparsec.ByteString
-Description :  Syntax instance for Attoparsec.ByteString.Parser.
+Module      :  Data.Syntax.Attoparsec.ByteString.Lazy
+Description :  Syntax instance for Attoparsec.ByteString.Lazy.Parser.
 Copyright   :  (c) Paweł Nowak
 License     :  MIT
 
 Maintainer  :  Paweł Nowak <pawel834@gmail.com>
 Stability   :  experimental
 
-Provides a Syntax instance for Attoparsec.ByteString.Parser.
+Provides a Syntax instance for Attoparsec.ByteString.Lazy.Parser.
 -}
-module Data.Syntax.Attoparsec.ByteString (
+module Data.Syntax.Attoparsec.ByteString.Lazy (
     WrappedParser,
     getParser,
     getParser_
@@ -21,7 +21,7 @@ import           Control.Arrow (Kleisli(..))
 import           Control.Category
 import           Control.Monad
 import           Control.SIArrow
-import qualified Data.Attoparsec.ByteString as AP
+import qualified Data.Attoparsec.ByteString.Lazy as AP
 import           Data.ByteString (ByteString)
 import           Data.Syntax
 import           Prelude hiding (id, (.))
