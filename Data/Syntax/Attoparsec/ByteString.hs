@@ -55,6 +55,9 @@ instance Syntax WrappedParser where
     uvecN n f = wrap $ VU.replicateM n $ unwrap f ()
     uivecN n f = wrap $ VU.generateM n $ fmap snd . unwrap f
 
+instance Isolable WrappedParser where
+    isolate p = Wrapped $ Kleisli $ either fail return . AP.parseOnly (unwrap p ())
+
 -- | Extracts the parser.
 getParser :: WrappedParser a b -> a -> AP.Parser b
 getParser (Wrapped (Kleisli f)) = f
