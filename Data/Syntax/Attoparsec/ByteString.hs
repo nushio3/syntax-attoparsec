@@ -26,6 +26,7 @@ import qualified Data.Attoparsec.ByteString as AP
 import           Data.ByteString (ByteString)
 import           Data.Syntax
 import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
 import           Prelude hiding (id, (.))
 
 -- | A wrapped 'Data.Attoparsec.ByteString.Parser'.
@@ -51,6 +52,8 @@ instance Syntax WrappedParser where
     takeTill = wrap . AP.takeTill
     vecN n f = wrap $ V.replicateM n $ unwrap f ()
     ivecN n f = wrap $ V.generateM n $ fmap snd . unwrap f
+    uvecN n f = wrap $ VU.replicateM n $ unwrap f ()
+    uivecN n f = wrap $ VU.generateM n $ fmap snd . unwrap f
 
 -- | Extracts the parser.
 getParser :: WrappedParser a b -> a -> AP.Parser b

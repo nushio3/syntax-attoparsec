@@ -28,6 +28,7 @@ import           Data.Syntax
 import           Data.Syntax.Char
 import           Data.Text (Text)
 import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as VU
 import           Prelude hiding (id, (.))
 
 -- | A wrapped 'Data.Attoparsec.Text.Parser'.
@@ -53,6 +54,8 @@ instance Syntax WrappedParser where
     takeTill = wrap . AP.takeTill
     vecN n f = wrap $ V.replicateM n $ unwrap f ()
     ivecN n f = wrap $ V.generateM n $ fmap snd . unwrap f
+    uvecN n f = wrap $ VU.replicateM n $ unwrap f ()
+    uivecN n f = wrap $ VU.generateM n $ fmap snd . unwrap f
 
 instance SyntaxChar WrappedParser where
     decimal = wrap AP.decimal
