@@ -25,6 +25,7 @@ import           Control.SIArrow
 import qualified Data.Attoparsec.ByteString as AP
 import           Data.ByteString (ByteString)
 import           Data.Syntax
+import qualified Data.Vector as V
 import           Prelude hiding (id, (.))
 
 -- | A wrapped 'Data.Attoparsec.ByteString.Parser'.
@@ -33,6 +34,9 @@ newtype WrappedParser a b = Wrapped (Kleisli AP.Parser a b)
 
 wrap :: AP.Parser b -> WrappedParser a b
 wrap = Wrapped . Kleisli . const
+
+unwrap :: WrappedParser a b -> a -> AP.Parser b
+unwrap (Wrapped f) = runKleisli f
 
 instance Syntax WrappedParser where
     type Seq WrappedParser = ByteString
@@ -45,6 +49,8 @@ instance Syntax WrappedParser where
     takeWhile = wrap . AP.takeWhile
     takeWhile1 = wrap . AP.takeWhile1
     takeTill = wrap . AP.takeTill
+    vecN n f = wrap $ V.replicateM n $ unwrap f ()
+    ivecN n f = wrap $ V.generateM n $ fmap snd . unwrap f
 
 -- | Extracts the parser.
 getParser :: WrappedParser a b -> a -> AP.Parser b
